@@ -6,11 +6,14 @@ public class SwipeController : MonoBehaviour
 {
     public GameObject scrollbar;
     public InputActionReference clickActionReference; // Reference to the Click action in the Default Input Actions
+    public Button nextButton;
+    public Button previousButton;
 
     private Scrollbar scrollbarComponent; // Cached Scrollbar component
     private float scroll_pos = 0;
     private float[] pos;
     private float distance;
+    private int currentIndex = 0;
 
     private const float LerpSpeed = 0.1f; // Speed of the lerp animation
     private const float SelectedScale = 1f; // Scale of the selected element
@@ -26,6 +29,10 @@ public class SwipeController : MonoBehaviour
 
         // Enable the click action
         clickActionReference.action.Enable();
+
+        // Add listeners to buttons
+        nextButton.onClick.AddListener(Next);
+        previousButton.onClick.AddListener(Previous);
     }
 
     void OnEnable()
@@ -38,6 +45,10 @@ public class SwipeController : MonoBehaviour
     {
         // Unregister the click event
         clickActionReference.action.performed -= OnClickPerformed;
+
+        // Remove listeners from buttons
+        nextButton.onClick.RemoveListener(Next);
+        previousButton.onClick.RemoveListener(Previous);
     }
 
     void Update()
@@ -81,6 +92,32 @@ public class SwipeController : MonoBehaviour
         {
             var delta = context.ReadValue<Vector2>();
             scroll_pos = Mathf.Clamp(scroll_pos + delta.x * 0.01f, 0f, 1f); // Adjust sensitivity as needed
+            scrollbarComponent.value = scroll_pos;
+        }
+    }
+
+    /// <summary>
+    /// Scrolls to the next element.
+    /// </summary>
+    public void Next()
+    {
+        if (currentIndex < pos.Length - 1)
+        {
+            currentIndex++;
+            scroll_pos = pos[currentIndex];
+            scrollbarComponent.value = scroll_pos;
+        }
+    }
+
+    /// <summary>
+    /// Scrolls to the previous element.
+    /// </summary>
+    public void Previous()
+    {
+        if (currentIndex > 0)
+        {
+            currentIndex--;
+            scroll_pos = pos[currentIndex];
             scrollbarComponent.value = scroll_pos;
         }
     }
